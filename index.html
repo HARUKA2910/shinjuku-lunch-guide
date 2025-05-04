@@ -14,28 +14,39 @@
 <body>
     <h1>新宿おすすめランチガイド</h1>
     <div id="map"></div>
-    {% for restaurant in restaurants %}
-    <div class="restaurant">
-        <h2>店名: {{ restaurant.name }}</h2>
-        <p>コメント: {{ restaurant.comment }}</p>
-        <p class="rating">評価: {{ restaurant.rating }}</p>
-        <p>住所: {{ restaurant.address }}</p>
+
+    <!-- 店情報をカード形式で表示 -->
+    <div id="restaurant-list">
+        {% for restaurant in restaurants %}
+            <div class="restaurant">
+                <h2>店名: {{ restaurant.name }}</h2>
+                <p>コメント: {{ restaurant.comment }}</p>
+                <p class="rating">評価: {{ restaurant.rating }}</p>
+                <p>住所: {{ restaurant.address }}</p>
+            </div>
+        {% endfor %}
     </div>
-    {% endfor %}
+
+    <!-- FlaskからJavaScriptにデータを渡す -->
     <script>
+        const restaurants = {{ restaurants | tojson }};
+        console.log(restaurants);
+
         function initMap() {
             const mapOptions = {
                 zoom: 15,
                 center: { lat: 35.6895, lng: 139.6917 } // 新宿の位置
             };
             const map = new google.maps.Map(document.getElementById("map"), mapOptions);
-            {% for restaurant in restaurants %}
-            new google.maps.Marker({
-                position: { lat: {{ restaurant.location.lat }}, lng: {{ restaurant.location.lng }} },
-                map: map,
-                title: "{{ restaurant.name }}"
+
+            // マーカーを配置
+            restaurants.forEach(restaurant => {
+                new google.maps.Marker({
+                    position: restaurant.location,
+                    map: map,
+                    title: restaurant.name
+                });
             });
-            {% endfor %}
         }
     </script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap"></script>
